@@ -47,3 +47,33 @@ This project was completed as part of M.Sc. Agriculture Analytics at the Indian 
 ---
 
 ## Repository Structure
+---
+
+## How to Run
+1. Open `soil_carbon_rf_model.R` in RStudio
+2. Install required packages:
+```r
+install.packages(c("randomForest", "terra", "raster", "sf", "ggplot2", "caret"))
+```
+3. Set your working directory to the project folder
+4. Run the script sequentially — each section is commented
+
+---
+
+## Output Maps
+*Output map to be added — QGIS-exported SOC prediction raster*
+
+---
+
+## Project Context
+- **Institution:** Indian Institute of Remote Sensing (IIRS-ISRO), Dehradun
+- **Program:** M.Sc. Agriculture Analytics (DAU · IIRS-ISRO · AAU)
+- **Semester:** Semester 2 (Jan–May 2026)
+- **Team:** Sathwik Ramaka, K. Yaswanthi
+
+---
+
+## Author
+**Sathwik Ramaka**
+M.Sc. Agriculture Analytics | Remote Sensing & Carbon MRV
+[LinkedIn]([https://linkedin.com/in/YOUR-LINKEDIN-URL](https://www.linkedin.com/in/sathwik-ramaka-1ba40227a?utm_source=share_via&utm_content=profile&utm_medium=member_android)) · [GitHub](https://github.com/sathwikramaka)
