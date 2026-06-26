@@ -1,6 +1,6 @@
 # =============================================================================
-# SOC_MASTER.R — Digital Soil Organic Carbon Mapping
-# Study Area : Dhanolti, Uttarakhand
+# soil_carbon_rf_model.R — Digital Soil Organic Carbon Mapping
+# Study Area: Dhanolti, Uttarakhand
 # Model      : Random Forest | Splits: 70:30 & 80:20 | CV: 5-fold, 10-fold, LOOCV
 # =============================================================================
 
