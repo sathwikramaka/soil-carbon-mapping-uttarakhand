@@ -135,4 +135,5 @@ soil-carbon-mapping-uttarakhand/
 
 **Sathwik Ramaka**  
 M.Sc. Agriculture Analytics | Remote Sensing & Carbon MRV  
-[LinkedIn](https://linkedin.com/[in/YOUR-LINKEDIN-URL](https://www.linkedin.com/in/sathwik-ramaka-1ba40227a?utm_source=share_via&utm_content=profile&utm_medium=member_android)) · [GitHub](https://github.com/sathwikramaka)
+[LinkedIn](https://linkedin.com/in/[YOUR-LINKEDIN-URL](https://www.linkedin.com/in/sathwik-ramaka-1ba40227a/)) · [GitHub](https://github.com/sathwikramaka)
+
