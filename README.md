@@ -25,7 +25,8 @@ Google Earth Engine-derived environmental covariates.
 5. Accuracy assessment (R², RMSE, MAE)
 
 ## Output Maps
-[Insert map image here]
+<img width="2750" height="2250" alt="SOC_Map" src="https://github.com/user-attachments/assets/c037fd96-adcc-450b-a4d3-52090305f13e" />
+
 
 ## How to Run
 ```bash
