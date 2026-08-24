@@ -1,7 +1,7 @@
 # Soil Organic Carbon Mapping — Dhanolti, Uttarakhand
 
 Digital soil mapping of Soil Organic Carbon (SOC) for the Dhanolti region,
-Uttarakhand is using the **SCORPAN-E framework** with **Random Forest** machine
+Uttarakhand using the **SCORPAN-E framework** with **Random Forest** machine
 learning. Environmental covariates were extracted from satellite and terrain
 data via Google Earth Engine.
 
@@ -20,6 +20,19 @@ data via Google Earth Engine.
 | Final model (ntree) | 1000 trees |
 | Resolution | 30 m |
 | Framework | SCORPAN-E |
+
+### Validation caveat
+
+All cross-validation reported here is random-fold (5-fold, 10-fold, LOOCV). Soil
+properties are spatially autocorrelated, so random folds place neighbouring
+samples in both the training and test sets, and the resulting score is
+optimistic. Reporting the best result across several split ratios adds a further
+layer of optimism. Spatially blocked re-validation is pending, and the honest
+expectation is a lower figure than 0.44.
+
+The spatial block cross-validation approach applied in my
+[Ludhiana carbon stock project](https://github.com/sathwikramaka/carbon-stock-estimation-ludhiana)
+is the one that should have been used here.
 
 ---
 
@@ -134,6 +147,5 @@ soil-carbon-mapping-uttarakhand/
 ## Author
 
 **Sathwik Ramaka**  
-M.Sc. Agriculture Analytics | Remote Sensing & Carbon MRV  
+M.Sc. Agriculture Analytics | Machine learning on satellite imagery  
 [LinkedIn](https://www.linkedin.com/in/sathwik-ramaka-1ba40227a/) · [GitHub](https://github.com/sathwikramaka)
-
