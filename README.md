@@ -121,7 +121,7 @@ Semester 2 project, Indian Institute of Remote Sensing (IIRS-ISRO), Dehradun · 
 
 | Member | Links |
 |---|---|
-| **Sathwik Ramaka** | [LinkedIn](https://www.linkedin.com/in/sathwik-ramaka-1ba40227a/) · [GitHub](https://github.com/sathwikramaka) |
+| **Sathwik Ramaka** | [LinkedIn](https://www.linkedin.com/in/sathwikramaka/) · [GitHub](https://github.com/sathwikramaka) |
 | **Kadiri Yaswanthi** | [LinkedIn](https://www.linkedin.com/in/kadiri-yaswanthi-9a632b204/) · [GitHub](https://github.com/YASWANTHI2410) |
 
 <sub>MIT licence</sub>
