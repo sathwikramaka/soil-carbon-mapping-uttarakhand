@@ -1,42 +1,48 @@
-# Soil Organic Carbon Mapping — Dhanolti, Uttarakhand
+<div align="center">
 
-Digital soil mapping of Soil Organic Carbon (SOC) for the Dhanolti region,
-Uttarakhand using the **SCORPAN-E framework** with **Random Forest** machine
-learning. Environmental covariates were extracted from satellite and terrain
-data via Google Earth Engine.
+# 🏔️ Soil Organic Carbon Mapping — Dhanolti, Uttarakhand
 
-**Program:** M.Sc. Agriculture Analytics — IIRS-ISRO, Dehradun (Semester 2, 2026)  
-**Authors:** Sathwik Ramaka · K. Yaswanthi
+**How much organic carbon do the topsoils of a Himalayan watershed hold, and where?**
+Digital soil mapping at 30 m with Random Forest on 27 Earth Engine covariates, structured on the SCORPAN-E framework.
 
----
+[![SOC map](https://img.shields.io/badge/SOC_map-View-00d4ff?style=for-the-badge&logo=googleearth&logoColor=white)](SOC_Map.png)
+[![Pipeline](https://img.shields.io/badge/R_pipeline-Read-00ff88?style=for-the-badge&logo=r&logoColor=white)](SOC_MASTER.R)
 
-## Key Results
+![R](https://img.shields.io/badge/R-276DC3?logo=r&logoColor=white)
+![Earth Engine](https://img.shields.io/badge/Google_Earth_Engine-4285F4?logo=google&logoColor=white)
+![randomForest](https://img.shields.io/badge/randomForest-2E7D32)
+![caret](https://img.shields.io/badge/caret-6A1B9A)
+![terra](https://img.shields.io/badge/terra_+_sf-8D6E63)
+![QGIS](https://img.shields.io/badge/QGIS-589632?logo=qgis&logoColor=white)
 
-| Metric | Value |
-|--------|-------|
-| Best Test R² | 0.44 |
-| Splits tested | 70:30 and 80:20 |
-| Cross-validation | 5-fold, 10-fold, LOOCV |
-| Final model (ntree) | 1000 trees |
-| Resolution | 30 m |
-| Framework | SCORPAN-E |
+<img src="SOC_Map.png" width="760" alt="Predicted soil organic carbon map, Dhanolti">
 
-### Validation caveat
-
-All cross-validation reported here is random-fold (5-fold, 10-fold, LOOCV). Soil
-properties are spatially autocorrelated, so random folds place neighbouring
-samples in both the training and test sets, and the resulting score is
-optimistic. Reporting the best result across several split ratios adds a further
-layer of optimism. Spatially blocked re-validation is pending, and the honest
-expectation is a lower figure than 0.44.
-
-The spatial block cross-validation approach applied in my
-[Ludhiana carbon stock project](https://github.com/sathwikramaka/carbon-stock-estimation-ludhiana)
-is the one that should have been used here.
+</div>
 
 ---
 
-## Covariates (27 Environmental Predictors)
+## 📊 Key results
+
+| | Result |
+|---|---|
+| 🤖 **Random Forest, best test R²** | **0.44** (random k-fold — see caveat below) |
+| ✂️ Splits tested | 70:30 and 80:20 |
+| 🔁 Cross-validation | 5-fold, 10-fold, LOOCV |
+| 🌲 Final model | 1,000 trees |
+| 🗺️ Resolution | 30 m |
+| 🧭 Framework | SCORPAN-E, 27 covariates |
+
+> ⚠️ **Validation caveat.** All cross-validation here is random-fold. Soil properties are spatially autocorrelated, so random folds put neighbouring samples in both training and test sets, and the score is optimistic. Reporting the best result across several split ratios adds more optimism. Spatially blocked re-validation is pending, and the honest expectation is a figure below 0.44. The spatial block cross-validation used in the [Ludhiana carbon stock project](https://github.com/sathwikramaka/carbon-stock-estimation-ludhiana) is the approach that should have been used here.
+
+## 🔍 What it does
+
+- **Covariates from Earth Engine** — terrain, climate, vegetation dynamics, hydrology, lithology, land use and soil properties for every pixel.
+- **Feature selection by importance** — Random Forest %IncMSE ranks predictors before the final model.
+- **Uncertainty as a map** — the spread across 1,000 trees is exported as its own raster next to the prediction.
+- **Zones for decisions** — the continuous map is also classified into five SOC zones.
+- **One script, six sections** — `SOC_MASTER.R` runs cleaning → selection → training → model choice → prediction → maps, and installs its own packages.
+
+## 🛰️ Covariates
 
 | Category | Variables |
 |----------|-----------|
@@ -47,38 +53,46 @@ is the one that should have been used here.
 | **Land** | Lithology, LULC |
 | **Soil Properties** | pH, Sand %, Clay %, Silt %, Nitrogen (g/kg), Bulk Density (kg/dm³) |
 
----
+## 🚀 Run it yourself
 
-## Pipeline Overview
+Edit the two lines at the top of `SOC_MASTER.R`, then source it:
 
-The script (`SOC_MASTER.R`) runs a full 6-section pipeline:
+```r
+PROJECT_DIR <- "path/to/your/project/folder"
+CSV_NAME    <- "your_soc_data.csv"   # inside PROJECT_DIR/data/
+source("SOC_MASTER.R")
+```
 
-Section 1 → Data loading, cleaning, outlier removal, median imputation
+<details>
+<summary><b>Pipeline, section by section</b></summary>
 
-Section 2 → Feature selection via RF variable importance (%IncMSE)
+| § | What it does |
+|---|---|
+| 1 | Data loading, cleaning, outlier removal, median imputation |
+| 2 | Feature selection via RF variable importance (%IncMSE) |
+| 3 | RF across 70:30 and 80:20 splits + 5-fold / 10-fold / LOOCV |
+| 4 | Best model selection + final RF (ntree = 1000) |
+| 5 | Spatial prediction → SOC map + uncertainty map (SD across trees) |
+| 6 | Map visualisation + output export |
 
-Section 3 → Model training: RF across 70:30 & 80:20 splits + 5-fold/10-fold/LOOCV
+</details>
 
-Section 4 → Best model selection + final RF (ntree=1000) training
+<details>
+<summary><b>Required input layout</b></summary>
 
-Section 5 → Spatial prediction → SOC map + uncertainty map (SD across trees)
+```
+PROJECT_DIR/
+  data/
+    your_soc_data.csv
+    rasters/       27 .tif covariate files
+    boundary/      .shp study-area boundary
+  output/          created by the script
+```
 
-Section 6 → Map visualisation + output export
+</details>
 
----
-
-## Tools & Libraries
-
-- **Language:** R / RStudio
-- **ML:** `randomForest`, `caret`
-- **Spatial:** `terra`, `sf`
-- **Covariate Source:** Google Earth Engine
-- **Visualisation:** `ggplot2`, `viridis`, `gridExtra`
-- **Data:** `dplyr`, `tidyr`, `readr`
-
----
-
-## Outputs
+<details>
+<summary><b>Outputs written to <code>output/</code></b></summary>
 
 | File | Description |
 |------|-------------|
@@ -95,57 +109,19 @@ Section 6 → Map visualisation + output export
 | `output/SOC_Map_Summary.csv` | Summary statistics |
 | `output/SOC_FinalRF_Model.rds` | Saved final RF model |
 
----
+</details>
 
-## How to Run
+## ⚠️ Limitations
 
-**1. Set up your paths** — edit only these two lines at the top of `SOC_MASTER.R`:
+Validation is random-fold, so R² 0.44 overstates performance on new locations (see caveat above). Sample points and covariate rasters are not in the repository, so the map cannot be regenerated from a fresh clone.
 
-```r
-PROJECT_DIR <- "path/to/your/project/folder"
-CSV_NAME    <- "your_soc_data.csv"   # must be inside PROJECT_DIR/data/
-```
+## 👥 Team
 
-**2. Folder structure required:**
+Semester 2 project, Indian Institute of Remote Sensing (IIRS-ISRO), Dehradun · M.Sc. Agriculture Analytics (DAU · AAU · IIRS-ISRO)
 
-PROJECT_DIR/
+| Member | Links |
+|---|---|
+| **Sathwik Ramaka** | [LinkedIn](https://www.linkedin.com/in/sathwik-ramaka-1ba40227a/) · [GitHub](https://github.com/sathwikramaka) |
+| **Kadiri Yaswanthi** | [LinkedIn](https://www.linkedin.com/in/kadiri-yaswanthi-9a632b204/) · [GitHub](https://github.com/YASWANTHI2410) |
 
-├── data/
-
-│   ├── your_soc_data.csv
-
-│   ├── rasters/          ← 27 .tif covariate files
-
-│   └── boundary/         ← .shp study area boundary
-
-└── output/               ← auto-created by script
-
-**3. Install packages and run:**
-
-```r
-source("SOC_MASTER.R")
-```
-
-All packages install automatically on first run.
-
----
-
-## Repository Structure
-
-soil-carbon-mapping-uttarakhand/
-
-├── SOC_MASTER.R     # Complete 6-section modelling pipeline
-
-├── README.md        # Project documentation
-
-├── .gitignore       # R gitignore
-
-└── LICENSE          # MIT License
-
----
-
-## Author
-
-**Sathwik Ramaka**  
-M.Sc. Agriculture Analytics | Machine learning on satellite imagery  
-[LinkedIn](https://www.linkedin.com/in/sathwik-ramaka-1ba40227a/) · [GitHub](https://github.com/sathwikramaka)
+<sub>MIT licence</sub>
