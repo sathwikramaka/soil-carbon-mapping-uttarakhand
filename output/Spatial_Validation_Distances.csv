@@ -1,0 +1,4 @@
+"","P10 (m)","P25 (m)","P50 (m)","P75 (m)","P90 (m)"
+"CV test -> train (Random)",364,519,687,1076,1464
+"CV test -> train (Spatial blocks)",1209,1793,2432,3528,4507
+"Map pixel -> sample",220,367,605,936,1331
