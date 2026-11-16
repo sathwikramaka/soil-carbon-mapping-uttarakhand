@@ -3,19 +3,20 @@
 # 🏔️ Soil Organic Carbon Mapping — Dhanolti, Uttarakhand
 
 **How much organic carbon do the topsoils of a Himalayan watershed hold, and where?**
-Digital soil mapping at 30 m with Random Forest on 27 Earth Engine covariates, structured on the SCORPAN-E framework.
+Digital soil mapping at 30 m with Random Forest and a Random Forest + SVR blend on 27 Earth Engine covariates, structured on the SCORPAN-E framework and checked with spatial validation.
 
-[![SOC map](https://img.shields.io/badge/SOC_map-View-00d4ff?style=for-the-badge&logo=googleearth&logoColor=white)](SOC_Map.png)
+[![SOC map](https://img.shields.io/badge/SOC_map-View-00d4ff?style=for-the-badge&logo=googleearth&logoColor=white)](output/SOC_Map.png)
 [![Pipeline](https://img.shields.io/badge/R_pipeline-Read-00ff88?style=for-the-badge&logo=r&logoColor=white)](SOC_MASTER.R)
 
 ![R](https://img.shields.io/badge/R-276DC3?logo=r&logoColor=white)
 ![Earth Engine](https://img.shields.io/badge/Google_Earth_Engine-4285F4?logo=google&logoColor=white)
 ![randomForest](https://img.shields.io/badge/randomForest-2E7D32)
 ![caret](https://img.shields.io/badge/caret-6A1B9A)
+![e1071](https://img.shields.io/badge/e1071_SVR-C62828)
 ![terra](https://img.shields.io/badge/terra_+_sf-8D6E63)
 ![QGIS](https://img.shields.io/badge/QGIS-589632?logo=qgis&logoColor=white)
 
-<img src="SOC_Map.png" width="760" alt="Predicted soil organic carbon map, Dhanolti">
+<img src="output/SOC_Map.png" width="760" alt="Predicted soil organic carbon map, Dhanolti">
 
 </div>
 
@@ -23,24 +24,45 @@ Digital soil mapping at 30 m with Random Forest on 27 Earth Engine covariates, s
 
 ## 📊 Key results
 
-| | Result |
-|---|---|
-| 🤖 **Random Forest, best test R²** | **0.44** (random k-fold — see caveat below) |
-| ✂️ Splits tested | 70:30 and 80:20 |
-| 🔁 Cross-validation | 5-fold, 10-fold, LOOCV |
-| 🌲 Final model | 1,000 trees |
-| 🗺️ Resolution | 30 m |
-| 🧭 Framework | SCORPAN-E, 27 covariates |
+| | Random Forest | Blend (RF + SVR) |
+|---|---|---|
+| Best single-split test R² | **0.438** (80:20 split, LOOCV-tuned) | — |
+| Holdout test R² — 80:20 / 70:30 | 0.414 / 0.347 | 0.416 / 0.257 |
+| Training R² — 80:20 / 70:30 | 0.824 / 0.797 | — |
+| **Mean test R², 50 repeated 80:20 splits** | **0.061** | **0.130** |
+| Mean R², random 5-fold CV (×20) | 0.046 | 0.115 |
+| Mean R², spatially blocked 5-fold CV (×20) | −0.318 | −0.320 |
 
-> ⚠️ **Validation caveat.** All cross-validation here is random-fold. Soil properties are spatially autocorrelated, so random folds put neighbouring samples in both training and test sets, and the score is optimistic. Reporting the best result across several split ratios adds more optimism. Spatially blocked re-validation is pending, and the honest expectation is a figure below 0.44. The spatial block cross-validation used in the [Ludhiana carbon stock project](https://github.com/sathwikramaka/carbon-stock-estimation-ludhiana) is the approach that should have been used here.
+| | |
+|---|---|
+| 🗺️ Map (blend) | mean SOC 3.12 %, range 2.68–3.42 %, 11,789 ha at 30 m |
+| 🌲 Models | Random Forest, 1,000 trees · blend = mean of RF (covariates + 6 oblique geographic coordinates) and radial SVR |
+| 🧭 Covariates | 19 of 27 kept by RF %IncMSE; top five: NDVI intercept, distance to stream, NDVI max, precipitation seasonality, mean annual temperature |
+| 🎯 Sampling | 80 field samples · 70:30 and 80:20 splits · 5-fold, 10-fold and LOOCV tuning |
+
+> ⚠️ **Read the 0.438 carefully.** It comes from one favourable 16-sample test set, and covariate selection saw those test rows. Over 50 repeated splits, with selection redone inside each training set, the Random Forest averages **R² ≈ 0.06** and the blend **≈ 0.13**. The blend beats the Random Forest in 76 % of those splits.
+
+## 🧪 Validation: which number describes the map?
+
+Spatially blocked cross-validation holds out whole regions (k-means clusters of sample locations). Whether that or random cross-validation describes the map depends on how far map pixels are from the samples (Milà et al. 2022):
+
+| Nearest-neighbour distance | Median | 90th percentile |
+|---|---|---|
+| Map pixel → nearest sample | 605 m | 1.33 km |
+| Random CV: test → training sample | 687 m | 1.46 km |
+| Spatial-block CV: test → training sample | 2.43 km | 4.51 km |
+
+- **Inside the watershed**, map pixels are as close to samples as random-CV test points are, so random CV is the right accuracy estimate for this map: **R² ≈ 0.05 (Random Forest) and ≈ 0.12 (blend)**.
+- **Outside it**, every model scores **R² < 0**. The covariates do not transfer to unsampled regions, so the model should not be applied beyond the sampled area.
 
 ## 🔍 What it does
 
 - **Covariates from Earth Engine** — terrain, climate, vegetation dynamics, hydrology, lithology, land use and soil properties for every pixel.
-- **Feature selection by importance** — Random Forest %IncMSE ranks predictors before the final model.
-- **Uncertainty as a map** — the spread across 1,000 trees is exported as its own raster next to the prediction.
-- **Zones for decisions** — the continuous map is also classified into five SOC zones.
-- **One script, six sections** — `SOC_MASTER.R` runs cleaning → selection → training → model choice → prediction → maps, and installs its own packages.
+- **Feature selection by importance** — Random Forest %IncMSE keeps the covariates that improve out-of-bag prediction.
+- **Splits × cross-validation** — Random Forest on 70:30 and 80:20 splits, `mtry` tuned by 5-fold, 10-fold and leave-one-out CV.
+- **Improved model** — a blend of a Random Forest with oblique geographic coordinates and a support-vector regression roughly doubles accuracy on held-out samples. Set `FINAL_MODEL <- "RF"` to map with the Random Forest alone.
+- **Honest validation** — repeated splits without selection leakage, plus random vs spatially blocked CV with a distance check.
+- **Uncertainty as a map** — the spread across 1,000 trees is exported next to the prediction, and the map is classified into five SOC zones.
 
 ## 🛰️ Covariates
 
@@ -55,25 +77,25 @@ Digital soil mapping at 30 m with Random Forest on 27 Earth Engine covariates, s
 
 ## 🚀 Run it yourself
 
-Edit the two lines at the top of `SOC_MASTER.R`, then source it:
+Put the data in `data/` next to `SOC_MASTER.R` (layout below), then from the repository folder:
 
-```r
-PROJECT_DIR <- "path/to/your/project/folder"
-CSV_NAME    <- "your_soc_data.csv"   # inside PROJECT_DIR/data/
-source("SOC_MASTER.R")
+```bash
+Rscript SOC_MASTER.R
 ```
+
+or `source("SOC_MASTER.R")` in RStudio. Missing packages are installed on first run. The full pipeline, including the repeated-split and spatial checks, takes about a minute on a multi-core PC. Settings such as `FINAL_MODEL`, `RUN_ROBUST` and `RUN_SPATIAL_CV` are at the top of the script.
 
 <details>
 <summary><b>Pipeline, section by section</b></summary>
 
 | § | What it does |
 |---|---|
-| 1 | Data loading, cleaning, outlier removal, median imputation |
-| 2 | Feature selection via RF variable importance (%IncMSE) |
-| 3 | RF across 70:30 and 80:20 splits + 5-fold / 10-fold / LOOCV |
-| 4 | Best model selection + final RF (ntree = 1000) |
-| 5 | Spatial prediction → SOC map + uncertainty map (SD across trees) |
-| 6 | Map visualisation + output export |
+| 1 | Load and clean: ID columns, SOC range, near-zero variance, 3×IQR outliers, median imputation |
+| 2 | Covariate selection by Random Forest %IncMSE |
+| 3 | Random Forest on 70:30 and 80:20 splits; `mtry` tuned by 5-fold, 10-fold, LOOCV; blend on the same rows |
+| 4 | Best model and final fit on all samples; 4b: 50 repeated splits with selection inside training |
+| 5 | Spatial prediction → SOC map, uncertainty map (SD across trees), zone map |
+| 6 | Spatial validation: random vs spatially blocked CV and the distance check |
 
 </details>
 
@@ -81,12 +103,12 @@ source("SOC_MASTER.R")
 <summary><b>Required input layout</b></summary>
 
 ```
-PROJECT_DIR/
-  data/
-    your_soc_data.csv
-    rasters/       27 .tif covariate files
-    boundary/      .shp study-area boundary
-  output/          created by the script
+SOC_MASTER.R
+data/
+  SOC_COMPLETE_FINAL_3.csv     field samples (SOC, lat/long, covariate values)
+  rasters/                     27 covariate GeoTIFFs
+  boundary/                    study-area shapefile
+output/                        created by the script
 ```
 
 </details>
@@ -96,24 +118,24 @@ PROJECT_DIR/
 
 | File | Description |
 |------|-------------|
-| `output/SOC_Predicted.tif` | SOC prediction raster (30m) |
-| `output/SOC_Uncertainty.tif` | SD across 1000 RF trees |
-| `output/SOC_Zones.tif` | Classified SOC zones (5 classes) |
-| `output/SOC_Map.png` | Continuous SOC map |
-| `output/SOC_Zone_Map.png` | Classified zone map |
-| `output/SOC_Uncertainty_Map.png` | Uncertainty map |
-| `output/Plot_Feature_Importance.png` | Variable importance chart |
-| `output/Plot_ObsVsPred.png` | Observed vs Predicted plot |
-| `output/Plot_Model_Comparison.png` | Cross-validation comparison |
-| `output/RF_All_Results.csv` | All model results |
-| `output/SOC_Map_Summary.csv` | Summary statistics |
-| `output/SOC_FinalRF_Model.rds` | Saved final RF model |
+| `SOC_Predicted.tif` · `SOC_Uncertainty.tif` · `SOC_Zones.tif` | Prediction, SD across trees, five-class zones (30 m) |
+| `SOC_Map.png` · `SOC_Zone_Map.png` · `SOC_Uncertainty_Map.png` | Maps |
+| `Plot_Feature_Importance.png` · `Plot_ObsVsPred.png` · `Plot_Model_Comparison.png` | Diagnostics |
+| `RF_All_Results.csv` | Every split × CV result, with the blend on the same rows |
+| `Robust_Eval.csv` | Test R² over 50 repeated splits, Random Forest vs blend |
+| `Spatial_Validation.csv` · `Spatial_Validation_Distances.csv` | Random vs spatially blocked CV and the distance check |
+| `SOC_Map_Summary.csv` · `feature_importance.csv` | Map statistics and covariate ranking |
+| `SOC_FinalRF_Model.rds` · `SOC_FinalBlend_Model.rds` | Saved models (not committed) |
+
+Figures and CSVs from the latest run are committed in [`output/`](output/).
 
 </details>
 
 ## ⚠️ Limitations
 
-Validation is random-fold, so R² 0.44 overstates performance on new locations (see caveat above). Sample points and covariate rasters are not in the repository, so the map cannot be regenerated from a fresh clone.
+- Accuracy is low: the covariates explain roughly 5 % (Random Forest) to 13 % (blend) of SOC variation at new points inside the watershed, and nothing outside it.
+- 80 samples over ~117 km² is sparse. More samples, or rasters for further covariates (NDMI, BSI, NDVI statistics, CEC), would help more than another algorithm.
+- Sample points and covariate rasters are not in the repository, so the map cannot be regenerated from a fresh clone.
 
 ## 👥 Team
 

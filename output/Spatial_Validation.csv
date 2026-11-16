@@ -1,0 +1,7 @@
+"CV","Model","Mean_R2","SD_R2","Mean_RMSE"
+"Random 5-fold","Blend",0.115,0.048,1.095
+"Random 5-fold","RF",0.046,0.049,1.136
+"Random 5-fold","RF+SVR",0.084,0.05,1.114
+"Spatial blocks 5-fold","Blend",-0.32,0.007,1.338
+"Spatial blocks 5-fold","RF",-0.318,0.008,1.337
+"Spatial blocks 5-fold","RF+SVR",-0.297,0.004,1.326
