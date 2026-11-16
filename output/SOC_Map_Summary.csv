@@ -1,0 +1,22 @@
+Metric,Value
+Area (ha),11789.6
+Min SOC (%),2.768
+Max SOC (%),3.406
+Mean SOC (%),3.142
+Median SOC (%),3.149
+Std Dev (%),0.071
+Mean Uncertainty SD (%),1.418
+OOB R2 (RF),0.111
+OOB RMSE (RF),1.104
+Final Model,Blend
+Best Split,80:20
+Best CV,10-fold
+Best mtry,6
+Test R2 (RF),0.441
+Test RMSE (RF),0.901
+Test R2 (Blend),0.483
+Test RMSE (Blend),0.867
+Mean Test R2 RF (50 splits),0.057
+Mean Test R2 Blend (50 splits),0.138
+Variables Used,ndvi_max; ndvi_intercept; dist_to_stream; precip_seasonality; nitrogen_gkg; mat_celsius; elevation_1; BD_kgdm3; sand_pct; SAVI; winter_ndvi_slope; lithology; EVI; ndvi_slope; silt_pct; NDVI; NDWI; pH_water; p_curvature_1; twi_1; LULC
+N Samples,80

@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project data and regenerable outputs (sample points are not published)
+data/
+output/data_clean.csv
+output/*.tif
+output/*.joblib
+output/*.rds
